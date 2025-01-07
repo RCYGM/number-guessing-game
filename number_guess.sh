@@ -13,7 +13,7 @@ NUMBER_GUESS() {
   echo "$SECRET_NUMBER"
 
   if [[ $1 ]]; then
-    echo "$1"
+    echo -e "\n$1"
   fi
 
   NUMBER_OF_GUESSES=$BEST_GAME
@@ -22,16 +22,25 @@ NUMBER_GUESS() {
   echo -e "\nGuess the secret number between 1 and 1000:"
   read NUMBER
   if [[ $NUMBER =~ ^[0-9]+$ ]]; then
+
+    NUMBER_OF_GUESSES=$(($NUMBER_OF_GUESSES + 1))
+    NUMBER_OF_GAMES=$(($NUMBER_OF_GAMES + 1))
+
     if [[ $NUMBER == $SECRET_NUMBER ]]; then
-      echo "SECRET NUMBER"
+      echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
+
+      UPDATE_GAMES_PLAYED_RESULT=$($PSQL "UPDATE game_stats SET games_played = $NUMBER_OF_GAMES  WHERE user_id = $USER_ID;")
+
+      if (($NUMBER_OF_GUESSES < $BEST_GAME)); then
+        UPDATE_BEST_GAME_RESULT=$($PSQL "UPDATE game_stats SET games_played = $NUMBER_OF_GUESSES  WHERE user_id = $USER_ID;")
+      fi
 
     elif (($NUMBER > $SECRET_NUMBER)); then
-      echo "It's higher"
+      NUMBER_GUESS "It's lower than that, guess again:"
     else
-      echo "It's lower"
+      NUMBER_GUESS "It's higher than that, guess again:"
     fi
   else
-    echo -e "\n"
     NUMBER_GUESS "That is not an integer, guess again:"
   fi
 }
