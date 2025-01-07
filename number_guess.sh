@@ -10,8 +10,10 @@ SECRET_NUMBER=$((RANDOM % 1000 + 1))
 
 NUMBER_GUESS() {
 
+  echo "$SECRET_NUMBER"
+
   if [[ $1 ]]; then
-    echo "That is not an integer, guess again:"
+    echo "$1"
   fi
 
   NUMBER_OF_GUESSES=$BEST_GAME
@@ -23,7 +25,7 @@ NUMBER_GUESS() {
     echo
   else
     echo -e "\n"
-    NUMBER_GUESS again
+    NUMBER_GUESS "That is not an integer, guess again:"
   fi
 }
 
