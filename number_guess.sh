@@ -6,6 +6,18 @@ read NAME
 
 USER_SELECT=$($PSQL "SELECT user_id, username, games_played, best_game FROM users INNER JOIN game_stats USING(user_id) WHERE username ILIKE '$NAME';")
 
+SECRET_NUMBER=$((RANDOM % 1000 + 1))
+
+NUMBER_GUESS() {
+
+  NUMBER_OF_GUESSES=$BEST_GAME
+  NUMBER_OF_GAMES=$GAMES_PLAYED
+
+  echo -e "\nGuess the secret number between 1 and 1000:"
+  read NUMBER
+
+}
+
 if [[ -z $USER_SELECT ]]; then
   echo "Welcome, $NAME! It looks like this is your first time here."
   NUMBER_GUESS
@@ -15,12 +27,3 @@ else
   done
   NUMBER_GUESS
 fi
-
-NUMBER_GUESS() {
-  SECRET_NUMBER=$((RAMDON % 1000 + 1))
-  NUMBER_OF_GUESSES=0
-
-  echo -e "\nGuess the secret number between 1 and 1000:"
-  read NUMBER
-
-}
