@@ -22,7 +22,14 @@ NUMBER_GUESS() {
   echo -e "\nGuess the secret number between 1 and 1000:"
   read NUMBER
   if [[ $NUMBER =~ ^[0-9]+$ ]]; then
-    echo
+    if [[ $NUMBER == $SECRET_NUMBER ]]; then
+      echo "SECRET NUMBER"
+
+    elif (($NUMBER > $SECRET_NUMBER)); then
+      echo "It's higher"
+    else
+      echo "It's lower"
+    fi
   else
     echo -e "\n"
     NUMBER_GUESS "That is not an integer, guess again:"
