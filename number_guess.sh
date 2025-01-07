@@ -10,12 +10,21 @@ SECRET_NUMBER=$((RANDOM % 1000 + 1))
 
 NUMBER_GUESS() {
 
+  if [[ $1 ]]; then
+    echo "That is not an integer, guess again:"
+  fi
+
   NUMBER_OF_GUESSES=$BEST_GAME
   NUMBER_OF_GAMES=$GAMES_PLAYED
 
   echo -e "\nGuess the secret number between 1 and 1000:"
   read NUMBER
-
+  if [[ $NUMBER =~ ^[0-9]+$ ]]; then
+    echo
+  else
+    echo -e "\n"
+    NUMBER_GUESS again
+  fi
 }
 
 if [[ -z $USER_SELECT ]]; then
