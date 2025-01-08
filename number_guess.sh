@@ -39,23 +39,24 @@ while [ "$NUMBER" != $SECRET_NUMBER ]; do
     NUMBER_OF_GUESSES=$(($NUMBER_OF_GUESSES + 1))
 
     # And if the number is correct, proceed to insert the data
-    if [[ $NUMBER -eq $SECRET_NUMBER ]]; then
-
-      # Create the user if it is their first game before inserting the data
-      if [[ -z $USER_ID ]]; then
-        $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" >/dev/null 2>&1
-        USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
-      fi
-      # Insert the game data and print the final message
-      $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" >/dev/null 2>&1
-      echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
-      exit 0
-    elif [[ $NUMBER -gt $SECRET_NUMBER ]]; then
+    if [[ $NUMBER -gt $SECRET_NUMBER ]]; then
       NUMBER_GUESS "It's lower than that, guess again:"
     else
       NUMBER_GUESS "It's higher than that, guess again:"
     fi
   else
-    NUMBER_GUESS "That is not an integer, guess again:"
+    echo "That is not an integer, guess again:"
   fi
+
+  read NUMBER
 done
+
+# Create the user if it is their first game before inserting the data
+if [[ -z $USER_ID ]]; then
+  $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" >/dev/null 2>&1
+  USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
+fi
+# Insert the game data and print the final message
+$PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" >/dev/null 2>&1
+echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
+exit 0
