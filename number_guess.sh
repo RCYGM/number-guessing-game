@@ -31,37 +31,31 @@ SECRET_NUMBER=$((RANDOM % 1000 + 1))
 echo "Guess the secret number between 1 and 1000:"
 read NUMBER
 
-# Print the correct messages
-if [[ $1 ]]; then
-  echo -e "$1"
-fi
+while [ "$NUMBER" != $SECRET_NUMBER ]; do
+  # Validate if the input is a number only
+  if [[ $NUMBER =~ ^[0-9]+$ ]]; then
 
-echo -e "\nGuess the secret number between 1 and 1000:"
-read NUMBER
+    # Add attempts in each iteration
+    NUMBER_OF_GUESSES=$(($NUMBER_OF_GUESSES + 1))
 
-# Validate if the input is a number only
-if [[ $NUMBER =~ ^[0-9]+$ ]]; then
+    # And if the number is correct, proceed to insert the data
+    if [[ $NUMBER -eq $SECRET_NUMBER ]]; then
 
-  # Add attempts in each iteration
-  NUMBER_OF_GUESSES=$(($NUMBER_OF_GUESSES + 1))
-
-  # And if the number is correct, proceed to insert the data
-  if [[ $NUMBER -eq $SECRET_NUMBER ]]; then
-
-    # Create the user if it is their first game before inserting the data
-    if [[ -z $USER_ID ]]; then
-      $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" >/dev/null 2>&1
-      USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
+      # Create the user if it is their first game before inserting the data
+      if [[ -z $USER_ID ]]; then
+        $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" >/dev/null 2>&1
+        USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
+      fi
+      # Insert the game data and print the final message
+      $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" >/dev/null 2>&1
+      echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
+      exit 0
+    elif [[ $NUMBER -gt $SECRET_NUMBER ]]; then
+      NUMBER_GUESS "It's lower than that, guess again:"
+    else
+      NUMBER_GUESS "It's higher than that, guess again:"
     fi
-    # Insert the game data and print the final message
-    $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" >/dev/null 2>&1
-    echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
-    exit 0
-  elif [[ $NUMBER -gt $SECRET_NUMBER ]]; then
-    NUMBER_GUESS "It's lower than that, guess again:"
   else
-    NUMBER_GUESS "It's higher than that, guess again:"
+    NUMBER_GUESS "That is not an integer, guess again:"
   fi
-else
-  NUMBER_GUESS "That is not an integer, guess again:"
-fi
+done
