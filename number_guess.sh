@@ -10,17 +10,14 @@ USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
 if [[ -z $USER_ID ]]; then
   NUMBER_GUESS "Welcome, $USERNAME! It looks like this is your first time here."
 else
+  BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
+  GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = $USER_ID")
   NUMBER_GUESS "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 fi
 
 if [[ -z $USERNAME ]]; then
   echo "Username cannot be empty."
   exit 1
-fi
-
-if [[ -n $USER_ID ]]; then
-  BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
-  GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = $USER_ID")
 fi
 
 NUMBER_OF_GUESSES=0
@@ -47,9 +44,11 @@ while [ "$NUMBER" != $SECRET_NUMBER ]; do
   else
     echo "That is not an integer, guess again:"
   fi
-
   read NUMBER
 done
+
+# Add attempts in each iteration
+NUMBER_OF_GUESSES=$(($NUMBER_OF_GUESSES + 1))
 
 # Create the user if it is their first game before inserting the data
 if [[ -z $USER_ID ]]; then
@@ -58,5 +57,4 @@ if [[ -z $USER_ID ]]; then
 fi
 # Insert the game data and print the final message
 $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" >/dev/null 2>&1
-echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
-exit 0
+echo "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
