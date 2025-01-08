@@ -6,11 +6,7 @@ read USERNAME
 
 USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
 
-if [[ -z $USER_ID ]]; then
-  BEST_GAME=0
-else
-  BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
-fi
+BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
 
 GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = $USER_ID")
 
@@ -36,11 +32,11 @@ NUMBER_GUESS() {
       echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
 
       if [[ -z $USER_ID ]]; then
-        $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" > stdout.txt
+        $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" >stdout.txt
         USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
       fi
 
-      $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" > stdout.txt
+      $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" >stdout.txt
 
     elif [[ $NUMBER -gt $SECRET_NUMBER ]]; then
       NUMBER_GUESS "It's lower than that, guess again:"
