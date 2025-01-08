@@ -4,20 +4,20 @@ PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 echo "Enter your username:"
 read USERNAME
 
+if [[ -z $USERNAME ]]; then
+  echo "Username cannot be empty."
+  exit 1
+fi
+
 USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
 
 # Validate if the user exists
 if [[ -z $USER_ID ]]; then
-  NUMBER_GUESS "Welcome, $USERNAME! It looks like this is your first time here."
+  echo "Welcome, $USERNAME! It looks like this is your first time here."
 else
   BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
   GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = $USER_ID")
-  NUMBER_GUESS "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
-fi
-
-if [[ -z $USERNAME ]]; then
-  echo "Username cannot be empty."
-  exit 1
+  echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 fi
 
 NUMBER_OF_GUESSES=0
@@ -28,7 +28,7 @@ SECRET_NUMBER=$((RANDOM % 1000 + 1))
 echo "Guess the secret number between 1 and 1000:"
 read NUMBER
 
-while [ "$NUMBER" != $SECRET_NUMBER ]; do
+while [ "$NUMBER" -ne "$SECRET_NUMBER" ]; do
   # Validate if the input is a number only
   if [[ $NUMBER =~ ^[0-9]+$ ]]; then
 
