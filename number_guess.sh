@@ -17,12 +17,12 @@ GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = $USE
 NUMBER_OF_GUESSES=0
 
 SECRET_NUMBER=$((RANDOM % 1000 + 1))
-echo "$SECRET_NUMBER"
+# echo "$SECRET_NUMBER"
 
 NUMBER_GUESS() {
 
   if [[ $1 ]]; then
-    echo -e "\n$1"
+    echo -e "$1"
   fi
 
   echo -e "\nGuess the secret number between 1 and 1000:"
@@ -31,18 +31,16 @@ NUMBER_GUESS() {
   if [[ $NUMBER =~ ^[0-9]+$ ]]; then
 
     NUMBER_OF_GUESSES=$(($NUMBER_OF_GUESSES + 1))
-    echo "$NUMBER_OF_GUESSES"
 
     if [[ $NUMBER -eq $SECRET_NUMBER ]]; then
       echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
 
       if [[ -z $USER_ID ]]; then
-        $PSQL "INSERT INTO users(username) VALUES('$USERNAME')"
+        $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" > stdout.txt
         USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
       fi
 
-      #GAMES_PLAYED=$(($GAMES_PLAYED + 1))
-      $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)"
+      $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" > stdout.txt
 
     elif [[ $NUMBER -gt $SECRET_NUMBER ]]; then
       NUMBER_GUESS "It's lower than that, guess again:"
