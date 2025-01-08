@@ -4,7 +4,7 @@ PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 echo "Enter your username:"
 read USERNAME
 
-USER_SELECT=$($PSQL "SELECT user_id, username, games_played, number_of_guesses FROM users INNER JOIN game_stats USING(user_id) WHERE username ILIKE '$USERNAME'")
+USER_SELECT=$($PSQL "SELECT user_id, username, games_played FROM users INNER JOIN game_stats USING(user_id) WHERE username ILIKE '$USERNAME'")
 echo "$USER_SELECT"
 
 USER_ID=$(echo "$USER_SELECT" | cut -d '|' -f 1)
@@ -16,8 +16,14 @@ fi
 
 USERNAME=$EXTRACTED_USERNAME
 
+if [[ -z $USER_SELECT ]]; then
+BEST_GAME=0
+else
+BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id = $USER_ID")
+fi
+
 GAMES_PLAYED=$(echo "$USER_SELECT" | cut -d '|' -f 3)
-BEST_GAME=$(echo "$USER_SELECT" | cut -d '|' -f 4)
+
 NUMBER_OF_GUESSES=0
 
 SECRET_NUMBER=$((RANDOM % 1000 + 1))
@@ -39,6 +45,7 @@ NUMBER_GUESS() {
 
     if [[ $NUMBER -eq $SECRET_NUMBER ]]; then
       echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
+      USER_SELECT=$($PSQL "SELECT user_id, username, games_played, MIN(number_of_guesses) AS best_game FROM users INNER JOIN game_stats USING(user_id) WHERE username ILIKE '$USERNAME'")
 
       GAMES_PLAYED=$(($GAMES_PLAYED + 1))
       $PSQL "INSERT INTO game_stats (user_id, games_played, number_of_guesses) VALUES ($USER_ID, $GAMES_PLAYED, $NUMBER_OF_GUESSES)"
