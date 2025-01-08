@@ -5,10 +5,10 @@ echo "Enter your username:"
 read USERNAME
 
 USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
-
-BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
-
-GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = $USER_ID")
+if [[ -n $USER_ID ]]; then
+  BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
+  GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = $USER_ID")
+fi
 
 NUMBER_OF_GUESSES=0
 
