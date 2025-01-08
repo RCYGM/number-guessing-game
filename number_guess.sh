@@ -37,9 +37,9 @@ while [ "$NUMBER" -ne "$SECRET_NUMBER" ]; do
 
     # And if the number is correct, proceed to insert the data
     if [[ $NUMBER -gt $SECRET_NUMBER ]]; then
-      NUMBER_GUESS "It's lower than that, guess again:"
+      echo "It's lower than that, guess again:"
     else
-      NUMBER_GUESS "It's higher than that, guess again:"
+      echo "It's higher than that, guess again:"
     fi
   else
     echo "That is not an integer, guess again:"
