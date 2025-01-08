@@ -4,12 +4,19 @@ PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 echo "Enter your username:"
 read USERNAME
 
+USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
+
+# Validate if the user exists
+if [[ -z $USER_ID ]]; then
+  NUMBER_GUESS "Welcome, $USERNAME! It looks like this is your first time here."
+else
+  NUMBER_GUESS "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
+fi
+
 if [[ -z $USERNAME ]]; then
   echo "Username cannot be empty."
   exit 1
 fi
-
-USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
 
 if [[ -n $USER_ID ]]; then
   BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
@@ -58,10 +65,3 @@ NUMBER_GUESS() {
     NUMBER_GUESS "That is not an integer, guess again:"
   fi
 }
-
-# Validate if the user exists
-if [[ -z $USER_ID ]]; then
-  NUMBER_GUESS "Welcome, $USERNAME! It looks like this is your first time here."
-else
-  NUMBER_GUESS "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
-fi
