@@ -4,6 +4,11 @@ PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 echo "Enter your username:"
 read USERNAME
 
+if [[ -z $USERNAME ]]; then
+  echo "Username cannot be empty."
+  exit 1
+fi
+
 USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
 
 if [[ -n $USER_ID ]]; then
@@ -32,11 +37,11 @@ NUMBER_GUESS() {
     if [[ $NUMBER -eq $SECRET_NUMBER ]]; then
 
       if [[ -z $USER_ID ]]; then
-        $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" >stdout.txt
+        $PSQL "INSERT INTO users(username) VALUES('$USERNAME')" >/dev/null 2>&1
         USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
       fi
 
-      $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" >stdout.txt
+      $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)" >/dev/null 2>&1
       echo -e "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
 
     elif [[ $NUMBER -gt $SECRET_NUMBER ]]; then
