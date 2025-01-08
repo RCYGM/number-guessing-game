@@ -12,7 +12,7 @@ else
   BEST_GAME=$($PSQL "SELECT MIN(number_of_guesses) AS best_game FROM game_stats WHERE user_id=$USER_ID")
 fi
 
-GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = 37")
+GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM game_stats WHERE user_id = $USER_ID")
 
 NUMBER_OF_GUESSES=0
 
@@ -41,6 +41,7 @@ NUMBER_GUESS() {
         USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
       fi
 
+      #GAMES_PLAYED=$(($GAMES_PLAYED + 1))
       $PSQL "INSERT INTO game_stats (user_id, number_of_guesses) VALUES ($USER_ID, $NUMBER_OF_GUESSES)"
 
     elif [[ $NUMBER -gt $SECRET_NUMBER ]]; then
@@ -56,12 +57,5 @@ NUMBER_GUESS() {
 if [[ -z $USER_ID ]]; then
   NUMBER_GUESS "Welcome, $USERNAME! It looks like this is your first time here."
 else
-  : <<'EOF'
-  echo "USER_ID, $USER_ID"
-  echo "USERNAME, $USERNAME"
-  echo "GAMES_PLAYED, $GAMES_PLAYED"
-  echo "BEST_GAME, $BEST_GAME"
-  echo "NUMBER_OF_GUESSES, $NUMBER_OF_GUESSES"
-EOF
   NUMBER_GUESS "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 fi
